@@ -14,9 +14,52 @@ from utils.general import check_img_size, check_requirements, check_imshow, non_
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
+from argparse import Namespace
 
-def detect(save_img=False):
-    source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
+def detect(
+    weights,
+    source,
+    img_size=640,
+    conf_thres=0.25,
+    iou_thres=0.45,
+    device='',
+    view_img=False,
+    save_txt=False,
+    save_conf=False,
+    nosave=False,
+    classes=None,
+    agnostic_nms=False,
+    augment=False,
+    update=False,
+    project='runs/detect',
+    name='exp',
+    exist_ok=False,
+    no_trace=False,
+    stframe=None
+):
+
+    opt = Namespace(
+        weights=weights,
+        source=source,
+        img_size=img_size,
+        conf_thres=conf_thres,
+        iou_thres=iou_thres,
+        device=device,
+        view_img=view_img,
+        save_txt=save_txt,
+        save_conf=save_conf,
+        nosave=nosave,
+        classes=classes,
+        agnostic_nms=agnostic_nms,
+        augment=augment,
+        update=update,
+        project=project,
+        name=name,
+        exist_ok=exist_ok,
+        no_trace=no_trace
+    )
+
+    source, weights, view_img, save_txt, imgsz, trace = source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
@@ -156,6 +199,8 @@ def detect(save_img=False):
                         vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer.write(im0)
 
+    stframe.image(im0, channels="BGR", use_column_width=True)
+
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
         #print(f"Results saved to {save_dir}{s}")
@@ -185,6 +230,7 @@ if __name__ == '__main__':
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
     opt = parser.parse_args()
     print(opt)
+
     #check_requirements(exclude=('pycocotools', 'thop'))
 
     with torch.no_grad():
