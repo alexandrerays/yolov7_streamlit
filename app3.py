@@ -1,38 +1,42 @@
 from detect_streamlit import *
 import tempfile
 import cv2
+import yaml
+from yaml.loader import SafeLoader
 
 import streamlit as st
 
 def main():
-    st.title('Detecção de Objectos usando o YOLOv7')
+    st.title('Monitoramento de tráfego rodoviário usando o YOLOv7')
 
     st.sidebar.title('Configurações')
 
-    st.markdown(
-        """
-        <style>
-        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child{ width: 500px;}
-        [data-testid="stSidebar"][aria-expanded="false"] > div:first-child{ width: 500px; margin-left: -200px}
-        </style>
-        """,
-        unsafe_allow_html = True,
-    )
-
-    st.sidebar.markdown('---')
-    confidence = st.sidebar.slider('Confidence', min_value=0.0, max_value=1.0, value=0.25)
+    confidence = st.sidebar.slider('Nível de confiança', min_value=0.0, max_value=1.0, value=0.25)
     st.sidebar.markdown('---')
 
     # Checkboxes
     save_img = st.sidebar.checkbox('Salvar Vídeo')
     enable_GPU = st.sidebar.checkbox('Habilitar GPU')
-    custom_classes = st.sidebar.checkbox('Usar classes')
+    custom_classes = st.sidebar.checkbox('Selecionar classes')
     assigned_class_id = []
     st.sidebar.markdown('---')
 
+    if enable_GPU:
+        device = 'gpu'
+    else:
+        device = 'cpu'
+
+
     # Custom classes
+    # Open the file and load the file
+    with open('data/coco.yaml') as f:
+        data = yaml.load(f, Loader=SafeLoader)
+        print(data)
+
+    names = data['names']
+
     if custom_classes:
-        assigned_class = st.sidebar.multiselect('Selecionar classes', list(names), default='person')
+        assigned_class = st.sidebar.multiselect('Selecionar classes', list(names), default=list(names))
         for each in assigned_class:
             assigned_class_id.append(names.index(each))
 
@@ -63,11 +67,29 @@ def main():
     stframe = st.empty()
     st.sidebar.markdown('---')
 
-    #kp1, kp2, kp3 = st.columns(3)
+    kpi1, kpi2, kpi3 = st.columns(3)
+
+    with kpi1:
+        st.markdown("**Frame Rate**")
+        kpi1_text = st.markdown("0")
+
+    with kpi2:
+        st.markdown("**Tracked Object**")
+        kpi2_text = st.markdown("0")
+
+    with kpi3:
+        st.markdown("**Dimensão**")
+        kpi3_text = st.markdown("0")
 
     detect(
         weights='yolov7-tiny.pt',
         source=tfflie.name,
+        conf_thres=confidence,
+        classes=assigned_class_id,
+        kpi1_text=kpi1_text,
+        kpi2_text=kpi2_text,
+        kpi3_text=kpi3_text,
+        device=device,
         stframe=stframe
     )
 
