@@ -19,6 +19,9 @@ from argparse import Namespace
 def detect(
     weights,
     source,
+    kpi1_text,
+    kpi2_text,
+    kpi3_text,
     img_size=640,
     conf_thres=0.25,
     iou_thres=0.45,
@@ -139,8 +142,11 @@ def detect(
         if classify:
             pred = apply_classifier(pred, modelc, img, im0s)
 
+        total_objs = 0
+
         # Process detections
         for i, det in enumerate(pred):  # detections per image
+
             if webcam:  # batch_size >= 1
                 p, s, im0, frame = path[i], '%g: ' % i, im0s[i].copy(), dataset.count
             else:
@@ -158,6 +164,7 @@ def detect(
                 for c in det[:, -1].unique():
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                    total_objs += n
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
@@ -199,7 +206,17 @@ def detect(
                         vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer.write(im0)
 
+        # Insert code for KPI
+        kpi1_text.write(f"<h1 style='text-align: center; color: red;'>{'{:.1f}'.format(fps)}</h1>", unsafe_allow_html=True)
+        kpi2_text.write(f"<h1 style='text-align: center; color: red;'>{total_objs}</h1>",
+                       unsafe_allow_html=True)
+        kpi3_text.write(f"<h1 style='text-align: center; color: red;'>{w}x{h}</h1>",
+                       unsafe_allow_html=True)
+
         stframe.image(im0, channels="BGR", use_column_width=True)
+
+
+
 
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
