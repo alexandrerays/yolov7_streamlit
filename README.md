@@ -26,6 +26,15 @@ Run the application
 streamlit run app_streamlit.py
 ```
 
+You should see something like that:
+
+
+<div align="center">
+    <a href="./">
+        <img src="./Oct-31-2022 09-59-53.gif" width="79%"/>
+    </a>
+</div>
+
 # Official YOLOv7
 
 Implementation of paper - [YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors](https://arxiv.org/abs/2207.02696)
