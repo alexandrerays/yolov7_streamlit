@@ -1,3 +1,31 @@
+
+# How to run?
+
+Create a virtualenv
+```
+virtualenv VIRTUALENV_NAME
+```
+
+Activate your virtualenv
+```
+.\VIRTUALENV_NAME\Scripts\activate
+```
+
+Install packages (this will take sometime)
+```
+pip install -r requirements.txt
+```
+
+Install streamlit
+```
+pip install streamlit
+```
+
+Run the application
+```
+streamlit run app_streamlit.py
+```
+
 # Official YOLOv7
 
 Implementation of paper - [YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors](https://arxiv.org/abs/2207.02696)
